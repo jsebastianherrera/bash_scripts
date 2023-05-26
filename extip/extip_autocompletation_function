@@ -1,0 +1,16 @@
+#!/bin/bash
+_autocompletation() {
+	COMPREPLY=()
+	local AVAILABE_COMMANDS="-i -h"
+	case ${COMP_CWORD} in
+	1)
+		COMPREPLY=($(compgen -W "${AVAILABE_COMMANDS}" -- "${cur}"))
+		;;
+	2)
+		if [ "${COMP_WORDS[1]}" == "-i" ]; then
+			COMPREPLY=($(compgen -W "$(ip addr | grep -E "^[0-9]" | awk '{print $2}' | sed 's/://')" -- "${cur}"))
+		fi
+		;;
+	esac
+}
+complete -F _autocompletation extip

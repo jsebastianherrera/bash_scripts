@@ -1,0 +1,45 @@
+#!/bin/bash
+#Colours
+greenColour="\e[0;32m\033[1m"
+endColour="\033[0m\e[0m"
+redColour="\e[0;31m\033[1m"
+blueColour="\e[0;34m\033[1m"
+yellowColour="\e[0;33m\033[1m"
+purpleColour="\e[0;35m\033[1m"
+turquoiseColour="\e[0;36m\033[1m"
+grayColour="\e[0;37m\033[1m"
+# Function to display the usage information
+usage() {
+	echo "Usage: $0 -i <interface_name>"
+	echo "Options:"
+	echo "  -i <interface_name>    : Interface's name"
+	echo "  -h                     : Usage"
+}
+verbose() {
+	local data=$(echo "$2" | grep -m 1 -A 2 "$1")
+	echo "${data}" | grep -m 1 -E "^    inet" | awk '{print $2}' | sed 's/\/.*//'
+}
+out=$(ip addr)
+interfaces=$(echo "${out}" | grep -E "^[0-9]" | awk '{print $2}' | sed 's/://')
+if [ $# -eq 0 ]; then
+	echo -e "${yellowColour}[*] Available Network Interfaces [*] ${endColour}"
+	for i in ${interfaces[@]}; do
+		ip=$(verbose "${i}" "${out}")
+		echo -e "[*] "${i}" \t  ${ip}"
+	done
+else
+	case "$1" in
+	-i)
+		if [[ -n $2 ]]; then
+			ip=$(verbose $2 "${out}")
+			echo -e "[*] $2 \t  ${ip}"
+			echo -n "${ip} " | xclip -selection clipboard
+			echo -e "[*] IP copied to clipboard"
+		else
+			usage
+		fi
+		;;
+	-h) usage ;;
+	*) usage ;;
+	esac
+fi
