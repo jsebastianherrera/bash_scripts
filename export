@@ -1,25 +1,9 @@
 #!/bin/bash
-extport() {
-	if [[ -f $1 ]]; then
-		local ports=$(cat $1 | grep -P '^\d{0,5}/.* open')
-		local ip=$(cat $1 | grep -Po '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' | head -n 1)
-		# Table header
-		echo "[*] Extracting information..."
-		echo "[*] Scan report for ${ip}"
-		printf "%-5s %-5s %-8s %s\n" "" "PORT" "SERVICE" "VERSION"
-		# Print separator
-		printf "%-5s %-5s %-8s %s\n" "" "----" "-------" "-------"
-		local list=()
-		while read -r line; do
-			local port=$(echo ${line} | awk '{print $1}' | sed "s/\/.*//")
-			list+=${port}
-			local service=$(echo ${line} | awk '{print $3}')
-			local version=$(echo ${line} | awk '{ out=""; for (i=4; i<=NF; i++) out=out $i " " ; print out}')
-			printf "%-2s %-1s %-5s %-8s %-s  \n" "" "[*]" "${port}" "${service}" "${version}"
-		done <<<"${ports}"
-		local extracted=$(echo ${list} | sed 's/ /,/g')
-		echo -n ${extracted} | xclip -selection clipboard
-		echo "[*] Extracted ports copied to clipboard ${extracted}"
-	fi
-
+function extport() {
+  if [[ -f $1 ]]; then
+  ports=$(cat $1 | grep -oP "^\d{1,5}" | tr "\n" "," | sed "s/,$//" )
+  echo "${ports}" | xclip -i -sel clip
+  notify-send "Ports copied!"
+  fi
 }
+
